@@ -1,0 +1,51 @@
+44 6
+0 suppkey int -1 {} 0
+1 partkey int 0 {0} 0
+2 nationkey int 1 {0,1} 0
+3 orderkey int 2 {0,1,2} 0
+4 l_shipmode string 3 {0,1,2,3} 0
+5 l_shipinstruct string 4 {0,1,2,3,4} 0
+6 l_linestatus char 5 {0,1,2,3,4,5} 0
+7 l_receiptdate date 6 {0,1,2,3,4,5,6} 0
+8 l_quantity double 7 {0,1,2,3,4,5,6,7} 0
+9 l_discount double 8 {0,1,2,3,4,5,6,7,8} 0
+10 l_commitdate date 9 {0,1,2,3,4,5,6,7,8,9} 0
+11 l_returnflag char 10 {0,1,2,3,4,5,6,7,8,9,10} 0
+12 l_tax double 11 {0,1,2,3,4,5,6,7,8,9,10,11} 0
+13 l_shipdate date 12 {0,1,2,3,4,5,6,7,8,9,10,11,12} 0
+14 l_linenumber int 13 {0,1,2,3,4,5,6,7,8,9,10,11,12,13} 0
+15 l_extendedprice double 14 {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14} 0
+16 l_comment string 15 {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15} 0
+17 o_orderdate date 3 {0,1,2,3} 0
+18 o_shippriority int 17 {0,1,2,3,17} 0
+19 o_totalprice double 18 {0,1,2,3,17,18} 0
+20 o_comment string 19 {0,1,2,3,17,18,19} 0
+21 o_clerk string 20 {0,1,2,3,17,18,19,20} 0
+22 custkey int 21 {0,1,2,3,17,18,19,20,21} 0
+23 o_orderpriority string 22 {0,1,2,3,17,18,19,20,21,22} 0
+24 o_orderstatus char 23 {0,1,2,3,17,18,19,20,21,22,23} 0
+25 s_phone string 2 {0,1,2} 0
+26 s_address string 25 {0,1,2,25} 0
+27 s_comment string 26 {0,1,2,25,26} 0
+28 s_name string 27 {0,1,2,25,26,27} 0
+29 s_acctbal double 28 {0,1,2,25,26,27,28} 0
+30 n_name string 2 {0,1,2} 0
+31 regionkey int 30 {0,1,2,30} 0
+32 n_comment string 31 {0,1,2,30,31} 0
+33 p_size int 1 {0,1} 0
+34 p_mfgr string 33 {0,1,33} 0
+35 p_name string 34 {0,1,34,33} 0
+36 p_container string 35 {0,1,34,33,35} 0
+37 p_brand string 36 {0,1,34,33,35,36} 0
+38 p_comment string 37 {0,1,34,33,35,36,37} 0
+39 p_retailprice double 38 {0,1,34,33,35,36,37,38} 0
+40 p_type string 39 {0,1,34,33,35,36,37,38,39} 0
+41 ps_availqty int 1 {0,1} 0
+42 ps_supplycost double 41 {0,1,41} 0
+43 ps_comment string 42 {0,1,42,41} 0
+PART 40 partkey,p_name,p_mfgr,p_brand,p_type,p_size,p_container,p_retailprice,p_comment
+PARTSUPP 43 partkey,suppkey,ps_availqty,ps_supplycost,ps_comment
+LINEITEM 16 orderkey,partkey,suppkey,l_linenumber,l_quantity,l_extendedprice,l_discount,l_tax,l_returnflag,l_linestatus,l_shipdate,l_commitdate,l_receiptdate,l_shipinstruct,l_shipmode,l_comment
+ORDERS 24 orderkey,custkey,o_orderstatus,o_totalprice,o_orderdate,o_orderpriority,o_clerk,o_shippriority,o_comment
+SUPPLIER 29 suppkey,s_name,s_address,nationkey,s_phone,s_acctbal,s_comment
+NATION 32 nationkey,n_name,regionkey,n_comment

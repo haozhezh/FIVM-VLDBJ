@@ -43,7 +43,11 @@ def build_chain(ordering):
     return root, build_relations(), {}
 
 
-def build_bushy_supp_root():
+# --- Bushy VO builders ---
+# Each matches the corresponding VOSpec in tree_generator.py Q9_ALL_VOS
+
+def build_bushy_vo25():
+    """suppkey → {nationkey, orderkey → partkey}"""
     nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
     root = nodes["supp"]
     root.add_child(nodes["order"])
@@ -52,7 +56,38 @@ def build_bushy_supp_root():
     return root, build_relations(), {}
 
 
-def build_bushy_order_root():
+def build_bushy_vo26():
+    """suppkey → {nationkey, partkey → orderkey}"""
+    nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
+    root = nodes["supp"]
+    root.add_child(nodes["nation"])
+    root.add_child(nodes["part"])
+    nodes["part"].add_child(nodes["order"])
+    return root, build_relations(), {}
+
+
+def build_bushy_vo27():
+    """suppkey → orderkey → {nationkey, partkey}"""
+    nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
+    root = nodes["supp"]
+    root.add_child(nodes["order"])
+    nodes["order"].add_child(nodes["nation"])
+    nodes["order"].add_child(nodes["part"])
+    return root, build_relations(), {}
+
+
+def build_bushy_vo28():
+    """suppkey → partkey → {nationkey, orderkey}"""
+    nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
+    root = nodes["supp"]
+    root.add_child(nodes["part"])
+    nodes["part"].add_child(nodes["nation"])
+    nodes["part"].add_child(nodes["order"])
+    return root, build_relations(), {}
+
+
+def build_bushy_vo29():
+    """orderkey → suppkey → {nationkey, partkey}"""
     nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
     root = nodes["order"]
     root.add_child(nodes["supp"])
@@ -61,7 +96,8 @@ def build_bushy_order_root():
     return root, build_relations(), {}
 
 
-def build_bushy_part_root():
+def build_bushy_vo30():
+    """partkey → suppkey → {nationkey, orderkey}"""
     nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
     root = nodes["part"]
     root.add_child(nodes["supp"])
@@ -70,15 +106,41 @@ def build_bushy_part_root():
     return root, build_relations(), {}
 
 
+# Complete enumeration: 30 VOs (24 chains + 6 bushy), matching Q9_ALL_VOS in tree_generator.py
+# Old numbering: vo1→vo1, vo2→vo14, vo3→vo19, vo4→vo12(CP!), vo5→vo2, vo6→vo25, vo7→vo29, vo8→vo30
 VO_CONFIGS = [
-    ("tpch_q9_vo1_nation_supp_order_part", lambda: build_chain(["nation", "supp", "order", "part"])),
-    ("tpch_q9_vo2_order_part_supp_nation", lambda: build_chain(["order", "part", "supp", "nation"])),
-    ("tpch_q9_vo3_part_order_supp_nation", lambda: build_chain(["part", "order", "supp", "nation"])),
-    ("tpch_q9_vo4_supp_order_part_nation", lambda: build_chain(["supp", "order", "part", "nation"])),
-    ("tpch_q9_vo5_nation_supp_part_order", lambda: build_chain(["nation", "supp", "part", "order"])),
-    ("tpch_q9_vo6_supp_root_bushy", build_bushy_supp_root),
-    ("tpch_q9_vo7_order_root_bushy", build_bushy_order_root),
-    ("tpch_q9_vo8_part_root_bushy", build_bushy_part_root),
+    # --- 24 chains (14 CP-free, 10 have Cartesian products) ---
+    ("tpch_q9_vo01_nation_supp_order_part", lambda: build_chain(["nation", "supp", "order", "part"])),      # CP-free  (=old vo1)
+    ("tpch_q9_vo02_nation_supp_part_order", lambda: build_chain(["nation", "supp", "part", "order"])),      # CP-free  (=old vo5)
+    ("tpch_q9_vo03_nation_order_supp_part", lambda: build_chain(["nation", "order", "supp", "part"])),      # CP-free
+    ("tpch_q9_vo04_nation_part_order_supp", lambda: build_chain(["nation", "part", "order", "supp"])),      # CP-free
+    ("tpch_q9_vo05_nation_order_part_supp", lambda: build_chain(["nation", "order", "part", "supp"])),      # CP-free
+    ("tpch_q9_vo06_nation_part_supp_order", lambda: build_chain(["nation", "part", "supp", "order"])),      # CP-free
+    ("tpch_q9_vo07_supp_nation_order_part", lambda: build_chain(["supp", "nation", "order", "part"])),      # CP
+    ("tpch_q9_vo08_supp_nation_part_order", lambda: build_chain(["supp", "nation", "part", "order"])),      # CP
+    ("tpch_q9_vo09_supp_order_nation_part", lambda: build_chain(["supp", "order", "nation", "part"])),      # CP
+    ("tpch_q9_vo10_supp_part_order_nation", lambda: build_chain(["supp", "part", "order", "nation"])),      # CP
+    ("tpch_q9_vo11_supp_part_nation_order", lambda: build_chain(["supp", "part", "nation", "order"])),      # CP
+    ("tpch_q9_vo12_supp_order_part_nation", lambda: build_chain(["supp", "order", "part", "nation"])),      # CP  (=old vo4)
+    ("tpch_q9_vo13_order_supp_nation_part", lambda: build_chain(["order", "supp", "nation", "part"])),      # CP
+    ("tpch_q9_vo14_order_part_supp_nation", lambda: build_chain(["order", "part", "supp", "nation"])),      # CP-free  (=old vo2)
+    ("tpch_q9_vo15_order_nation_supp_part", lambda: build_chain(["order", "nation", "supp", "part"])),      # CP-free
+    ("tpch_q9_vo16_order_nation_part_supp", lambda: build_chain(["order", "nation", "part", "supp"])),      # CP-free
+    ("tpch_q9_vo17_order_part_nation_supp", lambda: build_chain(["order", "part", "nation", "supp"])),      # CP-free
+    ("tpch_q9_vo18_order_supp_part_nation", lambda: build_chain(["order", "supp", "part", "nation"])),      # CP
+    ("tpch_q9_vo19_part_order_supp_nation", lambda: build_chain(["part", "order", "supp", "nation"])),      # CP-free  (=old vo3)
+    ("tpch_q9_vo20_part_supp_nation_order", lambda: build_chain(["part", "supp", "nation", "order"])),      # CP
+    ("tpch_q9_vo21_part_order_nation_supp", lambda: build_chain(["part", "order", "nation", "supp"])),      # CP-free
+    ("tpch_q9_vo22_part_supp_order_nation", lambda: build_chain(["part", "supp", "order", "nation"])),      # CP
+    ("tpch_q9_vo23_part_nation_supp_order", lambda: build_chain(["part", "nation", "supp", "order"])),      # CP-free
+    ("tpch_q9_vo24_part_nation_order_supp", lambda: build_chain(["part", "nation", "order", "supp"])),      # CP-free
+    # --- 6 bushy VOs (4 CP-free, 2 have Cartesian products) ---
+    ("tpch_q9_vo25_supp_root_order_nation_bushy", build_bushy_vo25),     # supp→{nation, order→part}  CP-free  (=old vo6)
+    ("tpch_q9_vo26_supp_root_part_nation_bushy", build_bushy_vo26),      # supp→{nation, part→order}  CP-free  NEW
+    ("tpch_q9_vo27_supp_root_order_branch_bushy", build_bushy_vo27),     # supp→order→{nation,part}   CP
+    ("tpch_q9_vo28_supp_root_part_branch_bushy", build_bushy_vo28),      # supp→part→{nation,order}   CP
+    ("tpch_q9_vo29_order_root_bushy", build_bushy_vo29),                  # order→supp→{nation,part}   CP-free  (=old vo7)
+    ("tpch_q9_vo30_part_root_bushy", build_bushy_vo30),                   # part→supp→{nation,order}   CP-free  (=old vo8)
 ]
 
 SCALES = ["sf0p1", "sf1"]

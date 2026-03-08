@@ -28,12 +28,18 @@ def build_bushy_cust_root():
     return root, relations, {}
 
 
+# Complete enumeration: 7 VOs (6 chains + 1 bushy), matching Q10_ALL_VOS in tree_generator.py
+# Old numbering: vo1→vo1, vo2→vo2, vo3→vo5, vo4→vo6, vo5→vo7
 VO_CONFIGS = [
-    ("tpch_q10_vo1_order_cust_nation", lambda: build_chain(["order", "cust", "nation"])),
-    ("tpch_q10_vo2_order_nation_cust", lambda: build_chain(["order", "nation", "cust"])),
-    ("tpch_q10_vo3_nation_cust_order", lambda: build_chain(["nation", "cust", "order"])),
-    ("tpch_q10_vo4_nation_order_cust", lambda: build_chain(["nation", "order", "cust"])),
-    ("tpch_q10_vo5_cust_root_bushy", build_bushy_cust_root),
+    # --- 6 chains (4 CP-free, 2 have Cartesian products) ---
+    ("tpch_q10_vo1_order_cust_nation", lambda: build_chain(["order", "cust", "nation"])),         # CP-free
+    ("tpch_q10_vo2_order_nation_cust", lambda: build_chain(["order", "nation", "cust"])),         # CP-free
+    ("tpch_q10_vo3_cust_order_nation", lambda: build_chain(["cust", "order", "nation"])),         # CP
+    ("tpch_q10_vo4_cust_nation_order", lambda: build_chain(["cust", "nation", "order"])),         # CP
+    ("tpch_q10_vo5_nation_cust_order", lambda: build_chain(["nation", "cust", "order"])),         # CP-free
+    ("tpch_q10_vo6_nation_order_cust", lambda: build_chain(["nation", "order", "cust"])),         # CP-free
+    # --- 1 bushy VO (CP-free) ---
+    ("tpch_q10_vo7_cust_root_bushy", build_bushy_cust_root),                                      # CP-free
 ]
 
 SCALES = ["sf0p1", "sf1"]

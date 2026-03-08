@@ -1,0 +1,48 @@
+41 6
+0 nationkey int -1 {} 0
+1 orderkey int 0 {0} 0
+2 custkey int 1 {0,1} 0
+3 c_comment string 2 {0,1,2} 0
+4 c_name string 3 {0,1,2,3} 0
+5 c_address string 4 {0,1,2,3,4} 0
+6 c_phone string 5 {0,1,2,3,4,5} 0
+7 c_acctbal double 6 {0,1,2,3,4,5,6} 0
+8 c_mktsegment string 7 {0,1,2,3,4,5,6,7} 0
+9 o_clerk string 2 {0,1,2} 0
+10 o_orderstatus char 9 {0,1,2,9} 0
+11 o_orderpriority string 10 {0,1,2,9,10} 0
+12 o_totalprice double 11 {0,1,2,9,10,11} 0
+13 o_comment string 12 {0,1,2,9,10,11,12} 0
+14 o_shippriority int 13 {0,1,2,9,10,11,12,13} 0
+15 o_orderdate date 14 {0,1,2,9,10,11,12,13,14} 0
+16 suppkey int 1 {0,1} 0
+17 l_discount double 16 {0,1,16} 0
+18 l_linenumber int 17 {0,1,16,17} 0
+19 l_tax double 18 {0,1,16,17,18} 0
+20 partkey int 19 {0,1,16,17,18,19} 0
+21 l_shipdate date 20 {0,1,16,17,18,19,20} 0
+22 l_extendedprice double 21 {0,1,16,17,18,19,20,21} 0
+23 l_shipinstruct string 22 {0,1,16,17,18,19,20,21,22} 0
+24 l_quantity double 23 {0,1,16,17,18,19,20,21,22,23} 0
+25 l_comment string 24 {0,1,16,17,18,19,20,21,22,23,24} 0
+26 l_shipmode string 25 {0,1,16,17,18,19,20,21,22,23,24,25} 0
+27 l_linestatus char 26 {0,1,16,17,18,19,20,21,22,23,24,25,26} 0
+28 l_commitdate date 27 {0,1,16,17,18,19,20,21,22,23,24,25,26,27} 0
+29 l_receiptdate date 28 {0,1,16,17,18,19,20,21,22,23,24,25,26,27,28} 0
+30 l_returnflag char 29 {0,1,16,17,18,19,20,21,22,23,24,25,26,27,28,29} 0
+31 s_phone string 16 {0,1,16} 0
+32 s_name string 31 {0,1,16,31} 0
+33 s_address string 32 {0,1,16,32,31} 0
+34 s_acctbal double 33 {0,1,16,32,33,31} 0
+35 s_comment string 34 {0,1,16,32,33,34,31} 0
+36 regionkey int 0 {0} 0
+37 n_comment string 36 {0,36} 0
+38 n_name string 37 {0,36,37} 0
+39 r_name string 36 {0,36} 0
+40 r_comment string 39 {0,36,39} 0
+CUSTOMER 8 custkey,c_name,c_address,nationkey,c_phone,c_acctbal,c_mktsegment,c_comment
+ORDERS 15 orderkey,custkey,o_orderstatus,o_totalprice,o_orderdate,o_orderpriority,o_clerk,o_shippriority,o_comment
+LINEITEM 30 orderkey,partkey,suppkey,l_linenumber,l_quantity,l_extendedprice,l_discount,l_tax,l_returnflag,l_linestatus,l_shipdate,l_commitdate,l_receiptdate,l_shipinstruct,l_shipmode,l_comment
+SUPPLIER 35 suppkey,s_name,s_address,nationkey,s_phone,s_acctbal,s_comment
+NATION 38 nationkey,n_name,regionkey,n_comment
+REGION 40 regionkey,r_name,r_comment
