@@ -43,7 +43,11 @@ def build_chain(ordering):
     return root, build_relations(), {}
 
 
-def build_bushy_supp_root():
+# --- Bushy VO builders ---
+# Each matches the corresponding VOSpec in tree_generator.py Q9_ALL_VOS
+
+def build_bushy_vo25():
+    """suppkey → {nationkey, orderkey → partkey}"""
     nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
     root = nodes["supp"]
     root.add_child(nodes["order"])
@@ -52,7 +56,18 @@ def build_bushy_supp_root():
     return root, build_relations(), {}
 
 
-def build_bushy_order_root():
+def build_bushy_vo26():
+    """suppkey → {nationkey, partkey → orderkey}"""
+    nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
+    root = nodes["supp"]
+    root.add_child(nodes["nation"])
+    root.add_child(nodes["part"])
+    nodes["part"].add_child(nodes["order"])
+    return root, build_relations(), {}
+
+
+def build_bushy_vo29():
+    """orderkey → suppkey → {nationkey, partkey}"""
     nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
     root = nodes["order"]
     root.add_child(nodes["supp"])
@@ -61,7 +76,8 @@ def build_bushy_order_root():
     return root, build_relations(), {}
 
 
-def build_bushy_part_root():
+def build_bushy_vo30():
+    """partkey → suppkey → {nationkey, orderkey}"""
     nodes = {name: VariableOrderNode(KEY_MAP[name]) for name in KEY_MAP}
     root = nodes["part"]
     root.add_child(nodes["supp"])
@@ -70,15 +86,29 @@ def build_bushy_part_root():
     return root, build_relations(), {}
 
 
+# 18 CP-free VOs (14 chains + 4 bushy), matching Q9_ALL_VOS in tree_generator.py
+# Cartesian-product VOs (12 total: 10 chains + 2 bushy) excluded.
 VO_CONFIGS = [
-    ("tpch_q9cnt_vo1_nation_supp_order_part", lambda: build_chain(["nation", "supp", "order", "part"])),
-    ("tpch_q9cnt_vo2_order_part_supp_nation", lambda: build_chain(["order", "part", "supp", "nation"])),
-    ("tpch_q9cnt_vo3_part_order_supp_nation", lambda: build_chain(["part", "order", "supp", "nation"])),
-    ("tpch_q9cnt_vo4_supp_order_part_nation", lambda: build_chain(["supp", "order", "part", "nation"])),
-    ("tpch_q9cnt_vo5_nation_supp_part_order", lambda: build_chain(["nation", "supp", "part", "order"])),
-    ("tpch_q9cnt_vo6_supp_root_bushy", build_bushy_supp_root),
-    ("tpch_q9cnt_vo7_order_root_bushy", build_bushy_order_root),
-    ("tpch_q9cnt_vo8_part_root_bushy", build_bushy_part_root),
+    # --- 14 CP-free chains ---
+    ("tpch_q9cnt_vo01_nation_supp_order_part", lambda: build_chain(["nation", "supp", "order", "part"])),
+    ("tpch_q9cnt_vo02_nation_supp_part_order", lambda: build_chain(["nation", "supp", "part", "order"])),
+    ("tpch_q9cnt_vo03_nation_order_supp_part", lambda: build_chain(["nation", "order", "supp", "part"])),
+    ("tpch_q9cnt_vo04_nation_part_order_supp", lambda: build_chain(["nation", "part", "order", "supp"])),
+    ("tpch_q9cnt_vo05_nation_order_part_supp", lambda: build_chain(["nation", "order", "part", "supp"])),
+    ("tpch_q9cnt_vo06_nation_part_supp_order", lambda: build_chain(["nation", "part", "supp", "order"])),
+    ("tpch_q9cnt_vo07_order_part_supp_nation", lambda: build_chain(["order", "part", "supp", "nation"])),
+    ("tpch_q9cnt_vo08_order_nation_supp_part", lambda: build_chain(["order", "nation", "supp", "part"])),
+    ("tpch_q9cnt_vo09_order_nation_part_supp", lambda: build_chain(["order", "nation", "part", "supp"])),
+    ("tpch_q9cnt_vo10_order_part_nation_supp", lambda: build_chain(["order", "part", "nation", "supp"])),
+    ("tpch_q9cnt_vo11_part_order_supp_nation", lambda: build_chain(["part", "order", "supp", "nation"])),
+    ("tpch_q9cnt_vo12_part_order_nation_supp", lambda: build_chain(["part", "order", "nation", "supp"])),
+    ("tpch_q9cnt_vo13_part_nation_supp_order", lambda: build_chain(["part", "nation", "supp", "order"])),
+    ("tpch_q9cnt_vo14_part_nation_order_supp", lambda: build_chain(["part", "nation", "order", "supp"])),
+    # --- 4 bushy VOs (all CP-free) ---
+    ("tpch_q9cnt_vo15_supp_root_order_nation_bushy", build_bushy_vo25),   # supp→{nation, order→part}
+    ("tpch_q9cnt_vo16_supp_root_part_nation_bushy", build_bushy_vo26),    # supp→{nation, part→order}
+    ("tpch_q9cnt_vo17_order_root_bushy", build_bushy_vo29),                # order→supp→{nation,part}
+    ("tpch_q9cnt_vo18_part_root_bushy", build_bushy_vo30),                 # part→supp→{nation,order}
 ]
 
 SCALES = ["sf0p1", "sf1"]
