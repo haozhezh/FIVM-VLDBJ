@@ -10,10 +10,18 @@ FIVM/examples/tods26-experiments/output/
 Only **sf1** (scale factor 1) results exist. Old sf0.1 and old hand-picked VO
 results have been moved to `output/old_results_backup/` and should NOT be used.
 
+There are **two types of experiments**: main (sum/aggregation) queries and count queries.
+
 ## File Naming Convention
 
+### Main (sum) queries
 ```
 tpch_q{Q}_vo{NN}_{description}_sf1_{mode}_pred_{pred}.csv
+```
+
+### Count queries
+```
+q{Q}count_tpch_q{Q}cnt_vo{NN}_{description}_sf1_{mode}_pred_{pred}.csv
 ```
 
 - `Q`: query number (3, 5, 9, 10)
@@ -22,7 +30,15 @@ tpch_q{Q}_vo{NN}_{description}_sf1_{mode}_pred_{pred}.csv
 - `mode`: `static` (dimension tables are TABLE, no updates) or `dynamic` (all tables are STREAM)
 - `pred`: `on` (query predicates applied) or `off` (no predicates)
 
-Example: `tpch_q5_vo01_nation_supp_cust_order_sf1_static_pred_on.csv`
+Examples:
+- Main: `tpch_q5_vo01_nation_supp_cust_order_sf1_static_pred_on.csv`
+- Count: `q5count_tpch_q5cnt_vo01_nation_supp_cust_order_sf1_static_pred_on.csv`
+
+### Main vs Count query difference
+
+Count queries use `SELECT SUM(1)` — no GROUP BY, no aggregation expressions.
+This isolates the join/maintenance overhead from the aggregation overhead.
+Same variable orders, same predicates, same table declarations.
 
 ## CSV Format
 
@@ -58,7 +74,7 @@ ORDERS,-1,1732,1732,0,0.856712
 
 Each VO is tested in 4 configurations: {static, dynamic} × {pred_on, pred_off} = 4 CSV files per VO.
 
-### Completion Status
+### Main Query Completion Status
 
 | Query | VOs | Configs | Files | Status |
 |-------|-----|---------|-------|--------|
@@ -66,6 +82,17 @@ Each VO is tested in 4 configurations: {static, dynamic} × {pred_on, pred_off} 
 | Q5  | 26 | 4 each | 104 expected | **Partial** (see below) |
 | Q9  | 18 | 4 each | 72  | **100% complete** |
 | Q10 | 5  | 4 each | 20  | **100% complete** |
+
+### Count Query Completion Status
+
+| Query | VOs | Configs | Files expected | Status |
+|-------|-----|---------|----------------|--------|
+| Q3 count  | 2  | 4 each | 8   | **100% complete** (from prior run) |
+| Q5 count  | 26 | 4 each | 104 | **Partial** (~19 of 104 from renamed old results) |
+| Q9 count  | 18 | 4 each | 72  | **Partial** (~28 of 72 from renamed old results) |
+| Q10 count | 5  | 4 each | 20  | **Needs re-run** (old results in subdirectory) |
+
+Count query experiments will be completed via `run_all_51vo_count.sh` (see Overnight Run section).
 
 ### Q5 Detailed Status
 
@@ -107,9 +134,14 @@ fill in any remaining gaps.
 
 ### VO Text Files
 
-Located in:
+Main queries:
 ```
 FIVM/examples/tods26-experiments/queries/tpch_query_{Q}/variable_orders/
+```
+
+Count queries (identical tree structures, just `q{Q}cnt` prefix):
+```
+FIVM/examples/tods26-experiments/queries/tpch_query_{Q}_count/variable_orders/
 ```
 
 File format (F-IVM DTREE format):
@@ -166,7 +198,9 @@ cd cost-model
 python pipeline.py --db tpch_sf1.duckdb --query all --breakdown
 ```
 
-## Overnight Run (to complete remaining Q5)
+## Overnight Runs
+
+### Main queries (to complete remaining Q5)
 
 ```bash
 cd FIVM/examples
@@ -175,3 +209,38 @@ nohup ./tods26-experiments/run_all_51vo.sh > tods26-experiments/output/run_all_5
 
 This will skip all already-completed experiments and attempt the remaining Q5 VOs
 with a 10-minute timeout. Check progress with `./tods26-experiments/check_progress.sh`.
+
+### Count queries (all 51 VOs)
+
+```bash
+cd FIVM/examples
+nohup ./tods26-experiments/run_all_51vo_count.sh > tods26-experiments/output/run_all_51vo_count.log 2>&1 &
+```
+
+204 total experiments (51 VOs × 4 configs). ~55 already done from prior runs.
+Count queries are typically much faster than main queries. Both runners are
+idempotent and resumable — they skip any experiment whose output CSV already
+exists and is non-empty.
+
+## What Happened With Count Query VO Numbering
+
+**Background**: When we expanded from hand-picked VOs to the exhaustive 51 CP-free
+set, the VO numbering changed (e.g., old Q5 vo1 = nation→cust→order→supp became
+new vo05; old Q9 vo4 = supp→order→part→nation was a Cartesian-product VO and was
+removed entirely).
+
+The main query experiment files were regenerated with the new numbering, but the
+count query `generate_assets.py` files were NOT updated — they still had the old
+7 VOs for Q5 and 8 VOs for Q9 (including 1 CP VO).
+
+**What was fixed**:
+1. Updated `tpch_query_5_count/generate_assets.py`: 7 old VOs → 26 CP-free VOs
+2. Updated `tpch_query_9_count/generate_assets.py`: 8 old VOs → 18 CP-free VOs
+3. Regenerated all 51 VO text files + 408 SQL files for count queries
+4. Created `run_all_51vo_count.sh` — unified resumable runner for all count queries
+5. Renamed existing count result CSVs to match new VO numbering
+6. Discarded Q9 old vo4 (supp→order→part→nation) count results — it was a CP VO
+
+**Verified by Codex GPT-5.4**: VO_CONFIGS match between main and count for all 4
+queries, join-key tree structures are identical, all SQL files use `SELECT SUM(1)`
+with no GROUP BY, file counts are correct (51 VOs, 408 SQL files).
