@@ -35,7 +35,8 @@ CREATE STREAM ORDERS (
   FROM FILE './datasets/updates_sf1_b10000_static/orders.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
-CREATE STREAM CUSTOMER (
+
+CREATE TABLE CUSTOMER (
         custkey        INT,
         c_name         VARCHAR(25),
         c_address      VARCHAR(40),
@@ -45,8 +46,9 @@ CREATE STREAM CUSTOMER (
         c_mktsegment   CHAR(10),
         c_comment      VARCHAR(117)
     )
-  FROM FILE './datasets/updates_sf1_b10000_static/customer.csv'
-  LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
+  FROM FILE './datasets/updates_sf1_b10000_static/customer_q3static.csv'
+  LINE DELIMITED CSV (delimiter := '|');
+
 
 SELECT  orderkey,
         o_orderdate,

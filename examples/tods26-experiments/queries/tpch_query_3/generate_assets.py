@@ -26,6 +26,10 @@ VO_CONFIGS = [
 ]
 
 SCALES = ["sf0p1", "sf1"]
+# Static-customer snapshot only exists for sf1 (sf0.1 out of scope for the
+# Q1 static-dynamic fix); for sf0.1 we fall back to streaming customer in
+# both modes — same behavior as before the fix.
+STATIC_CUSTOMER_SCALES = {"sf1"}
 MODES = ["static", "dynamic"]
 PRED_FLAGS = ["on", "off"]
 
@@ -48,6 +52,38 @@ def write_vo_files():
 
 def sql_template(mode, scale, pred_on, vo_file):
     base_path = f"./datasets/updates_{scale}_b10000_{mode}"
+
+    # Q1 static-dynamic convention: Customer is the static dimension table for Q3
+    # (analogous to Nation/Region in Q5/Q9). Lineitem and Orders remain streams.
+    customer_table = f"""
+CREATE TABLE CUSTOMER (
+        custkey        INT,
+        c_name         VARCHAR(25),
+        c_address      VARCHAR(40),
+        nationkey      INT,
+        c_phone        CHAR(15),
+        c_acctbal      DECIMAL,
+        c_mktsegment   CHAR(10),
+        c_comment      VARCHAR(117)
+    )
+  FROM FILE '{base_path}/customer_q3static.csv'
+  LINE DELIMITED CSV (delimiter := '|');
+"""
+    customer_stream = f"""
+CREATE STREAM CUSTOMER (
+        custkey        INT,
+        c_name         VARCHAR(25),
+        c_address      VARCHAR(40),
+        nationkey      INT,
+        c_phone        CHAR(15),
+        c_acctbal      DECIMAL,
+        c_mktsegment   CHAR(10),
+        c_comment      VARCHAR(117)
+    )
+  FROM FILE '{base_path}/customer.csv'
+  LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
+"""
+
     where_clause = (
         "WHERE   c_mktsegment = 'BUILDING'\n"
         "  AND   o_orderdate < DATE('1995-03-15')\n"
@@ -93,18 +129,7 @@ CREATE STREAM ORDERS (
   FROM FILE '{base_path}/orders.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
-CREATE STREAM CUSTOMER (
-        custkey        INT,
-        c_name         VARCHAR(25),
-        c_address      VARCHAR(40),
-        nationkey      INT,
-        c_phone        CHAR(15),
-        c_acctbal      DECIMAL,
-        c_mktsegment   CHAR(10),
-        c_comment      VARCHAR(117)
-    )
-  FROM FILE '{base_path}/customer.csv'
-  LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
+{customer_table if (mode == 'static' and scale in STATIC_CUSTOMER_SCALES) else customer_stream}
 
 SELECT  orderkey,
         o_orderdate,

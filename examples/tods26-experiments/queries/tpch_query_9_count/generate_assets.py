@@ -273,9 +273,9 @@ CREATE STREAM ORDERS (
   FROM FILE '{base_path}/orders.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
-{part_table if mode == 'static' else part_stream}
-{partsupp_table if mode == 'static' else partsupp_stream}
-{supplier_table if mode == 'static' else supplier_stream}
+{part_stream}
+{partsupp_stream}
+{supplier_stream}
 {nation_table if mode == 'static' else nation_stream}
 
 SELECT SUM(1)

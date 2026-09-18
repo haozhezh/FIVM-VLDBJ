@@ -155,7 +155,8 @@ def write_vo_files():
 def sql_template(mode, scale, pred_on, vo_file):
     base_path = f"./datasets/updates_{scale}_b10000_{mode}"
 
-    # Dimension tables: TABLE in static mode, STREAM in dynamic mode
+    # Only NATION is a true dimension table (TABLE in static mode).
+    # PART, PARTSUPP, SUPPLIER are fact/bridge tables → always STREAM.
     part_table = f"""
 CREATE TABLE PART (
         partkey        INT,
@@ -293,9 +294,9 @@ CREATE STREAM ORDERS (
   FROM FILE '{base_path}/orders.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
-{part_table if mode == 'static' else part_stream}
-{partsupp_table if mode == 'static' else partsupp_stream}
-{supplier_table if mode == 'static' else supplier_stream}
+{part_stream}
+{partsupp_stream}
+{supplier_stream}
 {nation_table if mode == 'static' else nation_stream}
 
 SELECT n_name,

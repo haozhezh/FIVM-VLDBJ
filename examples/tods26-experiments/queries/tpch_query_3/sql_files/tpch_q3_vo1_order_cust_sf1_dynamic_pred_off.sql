@@ -35,6 +35,7 @@ CREATE STREAM ORDERS (
   FROM FILE './datasets/updates_sf1_b10000_dynamic/orders.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
+
 CREATE STREAM CUSTOMER (
         custkey        INT,
         c_name         VARCHAR(25),
@@ -47,6 +48,7 @@ CREATE STREAM CUSTOMER (
     )
   FROM FILE './datasets/updates_sf1_b10000_dynamic/customer.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
+
 
 SELECT  orderkey,
         o_orderdate,

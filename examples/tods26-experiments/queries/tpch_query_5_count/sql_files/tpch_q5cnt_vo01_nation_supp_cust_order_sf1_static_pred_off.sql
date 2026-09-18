@@ -49,7 +49,7 @@ CREATE STREAM CUSTOMER (
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
 
-CREATE TABLE SUPPLIER (
+CREATE STREAM SUPPLIER (
         suppkey        INT,
         s_name         CHAR(25),
         s_address      VARCHAR(40),
@@ -59,7 +59,7 @@ CREATE TABLE SUPPLIER (
         s_comment      VARCHAR(101)
     )
   FROM FILE './datasets/updates_sf1_b10000_static/supplier.csv'
-  LINE DELIMITED CSV (delimiter := '|');
+  LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
 
 CREATE TABLE NATION (

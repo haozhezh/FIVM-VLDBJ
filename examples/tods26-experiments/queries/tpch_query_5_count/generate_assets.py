@@ -265,7 +265,7 @@ CREATE STREAM CUSTOMER (
   FROM FILE '{base_path}/customer.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
-{supplier_table if mode == 'static' else supplier_stream}
+{supplier_stream}
 {nation_table if mode == 'static' else nation_stream}
 {region_table if mode == 'static' else region_stream}
 

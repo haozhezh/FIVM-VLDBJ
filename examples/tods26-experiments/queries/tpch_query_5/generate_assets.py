@@ -142,7 +142,8 @@ def write_vo_files():
 def sql_template(mode, scale, pred_on, vo_file):
     base_path = f"./datasets/updates_{scale}_b10000_{mode}"
 
-    # Dimension tables: TABLE in static mode, STREAM in dynamic mode
+    # Only NATION and REGION are true dimension tables (TABLE in static mode).
+    # SUPPLIER is a fact table → always STREAM.
     supplier_table = f"""
 CREATE TABLE SUPPLIER (
         suppkey        INT,
@@ -265,7 +266,7 @@ CREATE STREAM CUSTOMER (
   FROM FILE '{base_path}/customer.csv'
   LINE DELIMITED CSV (delimiter := '|', predefined_batches := 'true');
 
-{supplier_table if mode == 'static' else supplier_stream}
+{supplier_stream}
 {nation_table if mode == 'static' else nation_stream}
 {region_table if mode == 'static' else region_stream}
 
